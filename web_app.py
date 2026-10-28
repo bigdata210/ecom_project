@@ -1,4 +1,4 @@
-"""Render entry point for the UI preview; no customer upload or data APIs."""
+"""Web entry point for the UI preview; no customer upload or data APIs."""
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
