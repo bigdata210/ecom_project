@@ -15,12 +15,12 @@
       <a class="brand" href="#dashboard"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 30 34" fill="none"><path d="M5 2h13l8 8v22H5z" stroke="currentColor" stroke-width="2.3"/><path d="M18 2v9h8M10 18h11M10 23h8M10 28h5" stroke="currentColor" stroke-width="2"/></svg></span><span>측정데이터 <strong>변환 플랫폼</strong></span></a>
       <span class="header-divider"></span>
       <label class="tenant-select"><span class="sr-only">업체</span><select id="tenant"><option>샘플 환경분석원</option><option>샘플 측정연구소</option></select></label>
-      <div class="header-tools"><span class="weather-mini"><span class="sun-mini">☀</span> 수원 <b>21°C</b><small>예시</small></span><button class="icon-button" id="notifications" aria-label="알림 확인"><span id="bell-icon"></span><i class="notice-dot"></i></button><button class="avatar" id="user-menu" aria-label="데모 사용자 안내">김</button></div>
+      <div class="header-tools"><a class="weather-mini" href="#weather">현재 위치 날씨 조회</a><button class="icon-button" id="notifications" aria-label="알림 확인"><span id="bell-icon"></span><i class="notice-dot"></i></button><button class="avatar" id="user-menu" aria-label="데모 사용자 안내">김</button></div>
     </div>
     <nav class="nav" aria-label="주 메뉴" id="navigation"></nav>
   </header>
   <main id="main" tabindex="-1"></main>
-  <footer class="page-footer"><span><i class="live-dot"></i>화면 미리보기</span><span>모든 측정값·기준·날씨는 예시입니다. 실제 로그인·변환·DB·외부 API는 아직 연결되지 않았습니다.</span></footer>
+  <footer class="page-footer"><span><i class="live-dot"></i>화면 미리보기</span><span>측정 데이터는 예시입니다. 날씨는 현재 위치 조회 시 기상청 관측값을 표시합니다. 로그인·변환·DB는 연결 예정입니다.</span></footer>
   <div id="toast" role="status" aria-live="polite"></div>
   <dialog id="info-dialog"><div id="dialog-content"></div><button class="button primary" id="close-dialog">확인</button></dialog>
 </body>
