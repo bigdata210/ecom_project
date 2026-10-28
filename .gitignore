@@ -1,0 +1,42 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.aws/
+.agents/
+.codex/
+
+# Dependencies and caches
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.next/
+.turbo/
+
+# Local processing, generated files, and desktop builds
+/tmp/
+/output/
+/build/
+/dist/
+*.spec
+*.log
+
+# Customer documents and measurement templates: store privately, not in Git
+*.pdf
+*.xls
+*.xlsx
+*.xlsm
+*.csv
+*.docx
+*.zip
+
+# Deployment-local files
+.vercel/
+.DS_Store
+Thumbs.db
+~$*
