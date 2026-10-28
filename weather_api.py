@@ -26,9 +26,9 @@ def grid(latitude, longitude):
 
 @lru_cache(maxsize=256)
 def observation(nx, ny, bucket):
-    key = os.getenv('data_api', '').strip()
+    key = os.getenv('data_api_key', '').strip()
     if not key:
-        raise HTTPException(503, 'Vercel 환경변수 data_api 설정 후 재배포가 필요합니다.')
+        raise HTTPException(503, 'Vercel 환경변수 data_api_key 설정 후 재배포가 필요합니다.')
     base = datetime.fromtimestamp(bucket * 600, KST) - timedelta(minutes=40)
     for offset in range(3):
         when = base - timedelta(hours=offset)

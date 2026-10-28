@@ -12,13 +12,13 @@ class WeatherTests(unittest.TestCase):
     def test_seoul_grid(self):
         self.assertEqual(grid(37.5665, 126.9780), (60, 127))
 
-    @patch.dict('os.environ', {'data_api': ''})
+    @patch.dict('os.environ', {'data_api_key': ''})
     def test_missing_key(self):
         with self.assertRaises(HTTPException) as error:
             observation(60, 127, 2988000)
         self.assertEqual(error.exception.status_code, 503)
 
-    @patch.dict('os.environ', {'data_api': 'test-only-secret%2B'})
+    @patch.dict('os.environ', {'data_api_key': 'test-only-secret%2B'})
     @patch('weather_api.urlopen')
     def test_values_and_cache(self, request):
         items=[dict(category=c, obsrValue=v, baseDate='20261028', baseTime='1300')
@@ -34,7 +34,7 @@ class WeatherTests(unittest.TestCase):
         self.assertEqual(request.call_count,1)
         self.assertIn('serviceKey=test-only-secret%2B',request.call_args.args[0])
 
-    @patch.dict('os.environ', {'data_api': 'test-only-secret'})
+    @patch.dict('os.environ', {'data_api_key': 'test-only-secret'})
     @patch('weather_api.urlopen', side_effect=ValueError('URL with test-only-secret'))
     def test_upstream_errors_do_not_leak_key(self, request):
         with self.assertRaises(HTTPException) as error:
