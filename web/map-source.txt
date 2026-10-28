@@ -1,0 +1,8 @@
+대한민국 시도 지도 출처
+통계청 통계지리정보서비스(SGIS), 2018 행정구역 경계.
+공공누리 제1유형(출처표시).
+https://sgis.kostat.go.kr/
+https://github.com/southkorea/southkorea-maps/tree/master/kostat/2018/json
+원자료 수집일: 2018-12-24.
+skorea-provinces-2018-topo.json을 투영·단순화하고 행정구역 명칭 일부를 갱신함.
+지도는 참고용이며 현재의 정확한 행정경계를 보장하지 않음.
