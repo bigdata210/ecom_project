@@ -1,8 +1,17 @@
-# 중금속 PDF 자동 입력 시제품
+# 환경 측정데이터 변환 플랫폼
 
 GitHub: https://github.com/bigdata210/ecom_project
 
-현재 저장소는 기존 유기인·VOC·중금속 변환 코드와 웹 전환 설계 자료를 관리합니다. 홈페이지 구현 및 Vercel 배포는 후속 단계입니다. 원본 문서와 실제 Excel 양식은 저장소에서 제외하며, 양식 준비 방법은 [templates/README.md](templates/README.md)를 확인하세요.
+현재 저장소에는 웹 화면 프리뷰와 기존 유기인·VOC·중금속 변환 코드가 있습니다. 웹 프리뷰는 예시 데이터로 화면과 이동 동선을 확인하는 버전입니다. 실제 로그인·변환·DB·LLM은 후속 단계에서 연결합니다. Render 배포 방법은 [웹 화면 배포 안내](docs/Render_웹화면_배포.md)를 확인하세요. 원본 문서와 실제 Excel 양식은 저장소에서 제외하며, 양식 준비 방법은 [templates/README.md](templates/README.md)를 확인하세요.
+
+웹 실행:
+
+```powershell
+python -m pip install -r requirements-web.txt
+python -m uvicorn web_app:app --host 127.0.0.1 --port 8765
+```
+
+아래는 기존 데스크톱 변환 프로그램 안내입니다.
 
 > 현재 통합 버전은 **MeasurementPDF.exe**입니다. 유기인·VOC·중금속을 자동 판별하며 중금속은 XLSX 2개를 생성합니다. 최신 사용법은 [통합 버전 안내](MEASUREMENT_README.md)를 확인하세요. 아래는 초기 중금속 시제품 설명입니다.
 
