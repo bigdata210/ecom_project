@@ -41,6 +41,48 @@ export default function ConvertFlow() {
   const [over, setOver] = useState(false);
   const site = sampleSite[domain];
 
+  // Reviewing a batch means hundreds of cells a day, so the value column is
+  // driven from the keyboard: the mouse is never required to move or edit.
+  const valueInputs = useRef<(HTMLInputElement | null)[]>([]);
+  const visibleRows = rows
+    .map((row, index) => ({ row, index }))
+    .filter(({ row }) => !warningOnly || row.warning);
+
+  function focusValue(index: number) {
+    setSelected(index);
+    const input = valueInputs.current[index];
+    input?.focus();
+    // Open the value selected so the next keystroke replaces it outright.
+    input?.select();
+  }
+
+  function moveFocus(from: number, delta: number) {
+    const at = visibleRows.findIndex(({ index }) => index === from);
+    const next = visibleRows[at + delta];
+    if (next) focusValue(next.index);
+  }
+
+  /** Enter jumps to the next row that needs attention, wrapping around. */
+  function focusNextWarning(from: number) {
+    const at = visibleRows.findIndex(({ index }) => index === from);
+    const ahead = visibleRows.slice(at + 1).find(({ row }) => row.warning)
+      ?? visibleRows.find(({ row }) => row.warning);
+    if (ahead) focusValue(ahead.index);
+  }
+
+  function onValueKeyDown(event: React.KeyboardEvent<HTMLInputElement>, index: number) {
+    const keys: Record<string, () => void> = {
+      ArrowDown: () => moveFocus(index, 1),
+      ArrowUp: () => moveFocus(index, -1),
+      Enter: () => focusNextWarning(index),
+      Escape: () => setRowValue(index, originalRows[index].value),
+    };
+    const action = keys[event.key];
+    if (!action) return;
+    event.preventDefault();
+    action();
+  }
+
   function chooseDomain(next: Domain) {
     setDomain(next);
     setStep(2);
@@ -256,17 +298,25 @@ export default function ConvertFlow() {
               </label>
             </div>
 
+            <p className="keyboard-hint">
+              <kbd>↑</kbd><kbd>↓</kbd> 행 이동 · <kbd>Enter</kbd> 다음 확인 항목 ·{' '}
+              <kbd>Esc</kbd> 원래 값으로 · 값은 선택된 채로 열려 바로 덮어쓸 수 있습니다.
+            </p>
+
             <div className="table-wrap">
               <table className="review-table">
                 <thead>
                   <tr><th>항목</th><th>측정값</th><th>단위</th><th>등록기준</th><th>상태</th><th>근거</th></tr>
                 </thead>
                 <tbody>
-                  {rows.map((row, i) => (warningOnly && !row.warning) ? null : (
+                  {visibleRows.map(({ row, index: i }) => (
                     <tr key={row.name} className={i === selected ? 'selected' : ''}>
                       <td>{row.name}</td>
                       <td>
                         <input aria-label={`${row.name} 측정값`} value={row.value} inputMode="decimal"
+                          ref={(element) => { valueInputs.current[i] = element; }}
+                          onFocus={() => setSelected(i)}
+                          onKeyDown={(event) => onValueKeyDown(event, i)}
                           onChange={(event) => setRowValue(i, event.target.value)} />
                       </td>
                       <td>{row.unit}</td>
