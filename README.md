@@ -6,22 +6,22 @@ GitHub: https://github.com/bigdata210/ecom_project
 
 ## 저장소 구성
 
-웹은 설계서 3장의 스택(Next.js + Vercel, 처리·조회는 Python Functions)을 따릅니다.
+웹은 설계서 3장의 스택(Next.js + Vercel)을 따릅니다.
 
 | 경로 | 역할 | 상태 |
 |---|---|---|
 | `app/` | Next.js App Router 화면 5개 | 화면 미리보기 |
 | `components/`, `lib/` | 화면 구성요소, 예시 데이터, API 어댑터, 공유 상태 | 화면 미리보기 |
-| `api/weather.py` | 기상청 초단기실황 (`/api/weather`) | 실데이터 |
-| `api/water/catalog.py`, `api/water/summary.py` | 물환경 자동측정망 조회·집계 (`/api/water/*`) | 실데이터 |
-| `api/_shared.py`, `api/_kma.py`, `api/_water.py`, `api/_data/` | 함수들이 공유하는 모듈과 코드표 (라우트 아님) | — |
-| `scripts/dev_api.py` | 로컬에서 Python Functions를 Vercel과 같은 경로로 서빙 | 개발용 |
+| `app/api/weather/` | 기상청 초단기실황 (`/api/weather`) | 실데이터 |
+| `app/api/water/catalog/`, `app/api/water/summary/` | 물환경 자동측정망 조회·집계 (`/api/water/*`) | 실데이터 |
+| `lib/server/` | 조회·집계 로직과 오류 처리 (서버 전용) | — |
+| `lib/water-stations.ts`, `lib/water-parameters.ts` | 자동측정망 측정소·항목 코드표 | — |
 | `measurement_app.py` 외 | 유기인·VOC·중금속 통합 변환 엔진 | 동작 |
 | `metal_app.py`, `fill_excel.ps1`, `build.ps1` | 초기 중금속 시제품 (Excel COM) | 사용 중단 |
 | `tests/` | 설계서 10.1절 정답 세트 자리 | 비어 있음 |
 | `docs/`, `templates/` | 배포·연동 문서 / 출력 양식 (Git 제외) | — |
 
-Python Functions는 **표준 라이브러리만** 사용합니다. 서버리스 번들을 작게 유지해 설계서 3.3절의 함수 크기·실행시간 제약을 피하기 위해서이며, 패키지가 필요한 문서 처리 워커는 별도 단계에서 붙입니다. `app/api`에는 Next.js route handler를 두지 않습니다. 두면 같은 경로의 Python Function을 가립니다.
+공개데이터 조회는 **Next.js Route Handler**입니다. 설계서 7.3절이 기상청 조회의 호출 주체를 웹 서버로 두고 있고, Vercel에서 Next.js 프로젝트에 Python 런타임을 함께 올리는 구성은 검증 과정에서 동작하지 않았습니다(`docs/Vercel_배포.md` 참고). 패키지가 필요한 **문서 처리 워커는 별도 런타임**으로 분리합니다. 외부 의존성은 `next`·`react`뿐이며 XML 파싱까지 표준 기능으로 처리합니다.
 
 ## 현재 단계에서 동작하는 것과 예시인 것
 
@@ -35,20 +35,14 @@ Python Functions는 **표준 라이브러리만** 사용합니다. 서버리스 
 
 ## 로컬 실행
 
-`next dev`는 Python 런타임을 실행하지 않으므로 두 프로세스를 함께 띄웁니다. `next.config.mjs`가 개발 환경에서만 `/api/*`를 아래 서버로 넘깁니다.
-
-```powershell
-python scripts/dev_api.py
-```
-
 ```powershell
 npm install
 npm run dev
 ```
 
-`http://localhost:3000`을 엽니다. 공공데이터 조회를 로컬에서 확인하려면 `dev_api.py`를 띄운 셸에 환경변수 `data_api_key`·`water_api_key`가 있어야 합니다. 타입 검사는 `npm run typecheck`입니다.
+`http://localhost:3000`을 엽니다. 공공데이터 조회를 로컬에서 확인하려면 셸에 환경변수 `data_api_key`·`water_api_key`가 있어야 합니다. 없으면 해당 API는 503과 안내 문구를 돌려줍니다.
 
-배포는 Vercel 한 프로젝트에서 Next.js와 Python Functions를 함께 빌드합니다. [Vercel 배포](docs/Vercel_배포.md), [기상청 연동](docs/기상청_연동.md)을 확인하세요.
+배포는 Vercel이 저장소 루트를 Next.js 프로젝트로 빌드합니다. [Vercel 배포](docs/Vercel_배포.md), [기상청 연동](docs/기상청_연동.md)을 확인하세요.
 
 ## 변환 엔진 — MeasurementPDF
 
@@ -105,11 +99,12 @@ python metal_app.py "중금속데이터.pdf" --extract-only --out output
 ## 테스트
 
 ```powershell
-python -m unittest -v test_weather test_water
-python -m unittest -v test_measurement test_organic test_metal_app
+npm test
 npm run typecheck
+npm run build
+python -m unittest -v test_measurement test_organic test_metal_app
 ```
 
-`test_weather`·`test_water`는 `api/`의 Python Functions를 직접 검증하며 외부 API를 호출하지 않습니다. 변환 엔진 통합 테스트는 개인 PC의 샘플 경로를 참조하므로, 저장소만 복제한 상태에서는 실행할 수 없습니다. 설계서 10장이 요구하는 비식별 정답 세트(`tests/fixtures`)와 PR 자동 실행(CI)은 아직 없습니다.
+`npm test`는 `tests/`의 22개 테스트로 격자 변환, XML 읽기, 값·시각 해석, 가중평균과 제외 규칙, 페이지 누락 검출, 키 유출 방지를 검증하며 외부 API를 호출하지 않습니다(Node 내장 타입 스트리핑을 사용하므로 테스트 의존성이 없습니다). 변환 엔진 통합 테스트는 개인 PC의 샘플 경로를 참조하므로, 저장소만 복제한 상태에서는 실행할 수 없습니다. 설계서 10장이 요구하는 비식별 정답 세트(`tests/fixtures`)와 PR 자동 실행(CI)은 아직 없습니다.
 
 각 결과 폴더의 추출 JSON은 웹·DB 개발에 재사용할 구조화 데이터입니다. 파일과 문서 안의 텍스트는 추출 대상 데이터로만 사용하며 실행 지시로 해석하지 않습니다. 원본 문서와 실제 Excel 양식은 저장소에서 제외하며, 양식 준비 방법은 [templates/README.md](templates/README.md)를 확인하세요.
