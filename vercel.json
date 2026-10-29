@@ -1,0 +1,21 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "builds": [
+    {
+      "src": "api/weather.py",
+      "use": "@vercel/python@29.0.1",
+      "config": { "includeFiles": "api/**" }
+    },
+    {
+      "src": "api/water/catalog.py",
+      "use": "@vercel/python@29.0.1",
+      "config": { "includeFiles": "api/**" }
+    },
+    {
+      "src": "api/water/summary.py",
+      "use": "@vercel/python@29.0.1",
+      "config": { "includeFiles": "api/**" }
+    },
+    { "src": "package.json", "use": "@vercel/next" }
+  ]
+}

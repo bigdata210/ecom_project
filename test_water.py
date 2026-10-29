@@ -1,9 +1,13 @@
 import io
+import os
+import sys
 import unittest
-from datetime import date
 from unittest.mock import patch
-from fastapi import HTTPException
-from water_api import aggregate, catalog, fetch_records, numeric, parse_page, summary
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'api'))
+
+from _shared import ApiError  # noqa: E402
+from _water import aggregate, catalog, fetch_records, numeric, summary  # noqa: E402
 
 STATIONS = [dict(id='S01001', name='가평', province='경기도', district='가평군', basin='한강', address=''),
             dict(id='S01002', name='흥천', province='경기도', district='여주시', basin='한강', address='')]
@@ -61,11 +65,11 @@ class WaterTests(unittest.TestCase):
         self.assertEqual(r['validCount'],1)
         self.assertEqual(r['duplicateCount'],1)
         self.assertTrue(r['dateOnly'])
-        with self.assertRaises(HTTPException):
+        with self.assertRaises(ApiError):
             aggregate([a,row('S01001','2026-07-20','3')],STATIONS,'m05','2026-07-20','daily')
 
     @patch.dict('os.environ',{'water_api_key':'test-secret%2B'})
-    @patch('water_api.urlopen')
+    @patch('_water.urlopen')
     def test_all_pages_and_key_encoding(self,request):
         request.side_effect=[io.BytesIO(xml([row('S01001','2026-07-20 10:00','1')],2)),
                              io.BytesIO(xml([row('S01001','2026-07-20 11:00','3')],2))]
@@ -78,31 +82,38 @@ class WaterTests(unittest.TestCase):
         self.assertEqual(request.call_count,2)
 
     @patch.dict('os.environ',{'water_api_key':'test-secret'})
-    @patch('water_api.urlopen')
+    @patch('_water.urlopen')
     def test_incomplete_pages_are_not_averaged(self,request):
         request.side_effect=[io.BytesIO(xml([row('S01001','2026-07-20','1')],2)),io.BytesIO(xml([],2))]
-        with self.assertRaises(HTTPException):
+        with self.assertRaises(ApiError):
             fetch_records('2026-07-20',('S01001',),1)
 
     @patch.dict('os.environ',{'water_api_key':'test-secret'})
-    @patch('water_api.urlopen',side_effect=ValueError('URL contains test-secret'))
+    @patch('_water.urlopen',side_effect=ValueError('URL contains test-secret'))
     def test_error_redaction(self,request):
-        with self.assertRaises(HTTPException) as error:
+        with self.assertRaises(ApiError) as error:
             fetch_records('2026-07-20',('S01001',),1)
         self.assertNotIn('test-secret',error.exception.detail)
 
     @patch.dict('os.environ',{'water_api_key':''})
     def test_missing_key(self):
-        with self.assertRaises(HTTPException) as error:
+        with self.assertRaises(ApiError) as error:
             fetch_records('2026-07-20',('S01001',),1)
-        self.assertEqual(error.exception.status_code,503)
+        self.assertEqual(error.exception.status,503)
 
-    @patch('water_api.fetch_records')
+    @patch('_water.fetch_records')
     def test_region_without_stations_does_not_call_upstream(self,request):
-        r=summary(date(2026,7,20),province='서울특별시')
+        r=summary(dict(day='2026-07-20',province='서울특별시'))
         self.assertIsNone(r['average'])
         self.assertEqual(r['selectedStationCount'],0)
         request.assert_not_called()
+
+    def test_summary_rejects_bad_parameters(self):
+        for params in [dict(day='2026-07-20',item='nope'),dict(day='2026-07-20',mode='nope'),
+                       dict(day='not-a-date'),dict(day='1999-01-01')]:
+            with self.assertRaises(ApiError) as error:
+                summary(params)
+            self.assertEqual(error.exception.status,422)
 
 if __name__=='__main__':
     unittest.main()
