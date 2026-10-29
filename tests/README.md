@@ -13,9 +13,10 @@
 `.gitignore`가 `*.pdf`·`*.xlsx`를 제외하므로, 정답 세트를 추가할 때는 이 폴더 경로만 예외로 허용하고
 식별 정보가 없는지 확인한 파일만 올립니다.
 
-현재 실행 가능한 테스트는 저장소 루트에 있습니다.
+이 폴더의 `kma.test.ts`·`water.test.ts`는 공개데이터 조회 로직의 단위 테스트입니다.
+Node 내장 타입 스트리핑으로 실행하므로 테스트 의존성이 없습니다.
 
 ```powershell
-python -m unittest -v test_weather test_water
+npm test
 python -m unittest -v test_measurement test_organic test_metal_app
 ```
