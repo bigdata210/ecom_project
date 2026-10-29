@@ -1,9 +1,11 @@
 [project]
-name = "ecom-platform"
+name = "ecom-platform-web"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
-# The web app is Next.js (package.json). Python here is the desktop converter
-# and the Vercel Python Functions under api/, which need no third-party
-# packages. Vercel builds this repository as a Next.js project; the functions
-# are configured in vercel.json.
-dependencies = []
+dependencies = [
+    "fastapi==0.162.0",
+    "uvicorn==0.54.0",
+]
+
+[tool.vercel]
+entrypoint = "web_app:app"

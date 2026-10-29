@@ -44,7 +44,7 @@
 ## 개발 실행과 빌드
 
 ```powershell
-python -m pip install -r requirements-desktop.txt
+python -m pip install -r requirements.txt
 python measurement_app.py
 python measurement_app.py "유기인데이터.pdf" "VOC데이터.pdf" "중금속데이터.pdf" --out output
 ./build_measurement.ps1

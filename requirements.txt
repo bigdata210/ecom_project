@@ -1,5 +1,2 @@
-# Dependencies for the Vercel Python Functions under api/.
-# The public-data endpoints use the standard library only, which keeps each
-# serverless bundle small. Add a package here only when a function imports it.
-#
-# Desktop converter dependencies are in requirements-desktop.txt.
+pdfplumber>=0.11,<1
+pyinstaller>=6,<7
